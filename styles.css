@@ -1,0 +1,131 @@
+:root {
+    --bg-color: #f0f2f5;
+    --text-color: #f1e9e9;
+    --card-bg: #fff;
+    --primary-color: #4a6fa5;
+    --secondary-color: #6c757d;
+}
+
+[data-theme="dark"] {
+    --bg-color: #f3ebeb;
+    --text-color: #f0f0f0;
+    --card-bg: #1e1e1e;
+    --primary-color: #6d8cc0;
+    --secondary-color: #a0a0a0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+   /* Add this to your existing styles */
+body {
+    transition: background-image 1s ease-in-out;
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+/* Remove or modify the existing background-color in body styles */
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+input, button {
+    padding: 10px 15px;
+    border-radius: 5px;
+    border: 1px solid var(--secondary-color);
+}
+
+input {
+    flex-grow: 1;
+    max-width: 300px;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.5s;
+    height:20px;
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+#weather-display {
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(231, 227, 227, 0.1);
+}
+
+.current-weather {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.temp-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+#temperature {
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+#unit {
+    font-size: 1.5rem;
+}
+
+#weather-icon {
+    width: 100px;
+    height: 100px;
+}
+
+.forecast {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.forecast-day {
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 8px;
+    min-width: 120px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
