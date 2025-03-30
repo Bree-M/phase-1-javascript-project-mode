@@ -5,138 +5,99 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aviation Weather App</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        :root {
-            --bg-color: transparent;
-            --text-color: #e0e0e0;
-            --accent-color: #4a90e2;
-            --card-bg: rgba(185, 70, 70, 0.75);
-            --border-color: rgba(141, 40, 40, 0.1);
-        }
-        
-        body {
-            font-family: 'Courier New', monospace;
-            color: rgb(236, 214, 113);
-            margin: 0;
-            padding: 0;
-            line-height: 1.0;
-            background-image: url('https://i.pinimg.com/474x/d9/9f/de/d99fdeb1c12fe9aa39ad8f867bc5159a.jpg');
-            background-size:cover;
-            background-position: top;
-        }
-        
-        .container {
-            max-width: 450px;
-            margin: 10px auto;
-            border-radius: 10px;
-            background-color: var(--card-bg);
-            backdrop-filter: blur(8px);
-            box-shadow: 0 8px 32px rgba(216, 44, 144, 0.3);
-            padding: 7px;
-            height: 200vh;  
-            display: flex;
-            -ms-flex-direction: column;         
-            -webkit-flex-direction: column;
-            flex-direction: column;
-            font-size: 18px;
-            text-align: bottom left;
-            
-            
-        }
-        
-        .editable {
-            background: rgba(241, 198, 198, 0.1);
-            border: 1px solid var(--border-color);
-            padding: 50px;
-            border-radius: 20px;
-            width: 50%;
-            height:900px;
-            color:rgb(245, 146, 66) ;
-            margin-bottom: 10px;
-            font-size: 30px;
-            
-        }
-        
-        .weather-list {
-            margin-top: 15px;
-        }
-        
-        .weather-card {
-            background: rgba(24, 23, 23, 0.3);
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            
-        }
-
-        button {
-    background-color: var(--primary-color);
-    color: white;
-    border: solid;
-    cursor: pointer;
-    transition: opacity 8.5s;
-    height:100px;
-    font-size: 2rem;
-    font-weight: bold;
-}
-
-    </style>
-</head>
+ </head>
 <body>
     <div class="container">
-        <h2>Flight Information</h2>
-        <label>Flight Number:</label>
-        <input type="text" class="editable" id="flight-number" placeholder="Enter flight number">
+        <header>
+            <h1>Aviation Weather Dashboard</h1>
+            <div class="bg-controls">
+                <button id="prev-bg" class="btn btn-light">← Background</button>
+                <button id="next-bg" class="btn btn-light">Background →</button>
+            </div>
+        </header>
         
-        <label>Aircraft:</label>
-        <input type="text" class="editable" id="aircraft" placeholder="Enter aircraft type">
-
-          
-        <label>Destination:</label>
-        <input type="text" class="editable" id="Destination" placeholder="Enter destination airport">
-        
-        <label>Departure:</label>
-        <input type="text" class="editable" id="departure" placeholder="Enter departure airport">
-        
-        <label>Arrival:</label>
-        <input type="text" class="editable" id="arrival" placeholder="Enter arrival airport">
-        
-        <label>Departure Time:</label>
-        <input type="time" class="editable" id="departure-time">
-        
-        <label>Arrival Time:</label>
-        <input type="time" class="editable" id="arrival-time">
-        
-        <h2>Weather Lookup</h2>
-        <input type="text" class="editable" id="icao-code" placeholder="Enter ICAO code (e.g., ROAH)">
-        <button id="search-btn">Get Weather</button>
-        
-        <div class="weather-list" id="weather-list"></div>
-    </div>
-    
-    <script>
-        document.getElementById('search-btn').addEventListener('click', async function() {
-            const icao = document.getElementById('icao-code').value.trim().toUpperCase();
-            if (!icao) return;
-
-            try {
-                const response = await fetch(`http://api.weatherapi.com/v1/current.json`);
-                const data = await response.text();
+        <div class="tab-container">
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="weather">Weather</button>
+                <button class="tab-button" data-tab="flights">Flight Information</button>
+                <button class="tab-button" data-tab="pilot-briefing">Pilot Briefing</button>
+            </div>
+            
+            <div class="tab-content active" id="weather-tab">
+                <div class="search-container">
+                    <input type="text" id="icao-code" class="search-input" placeholder="Enter ICAO code (e.g., KLAX)" maxlength="4">
+                    <button id="search-btn" class="btn btn-primary">Get Weather</button>
+                </div>
                 
-                if (data) {
-                    const weatherCard = document.createElement('div');
-                    weatherCard.classList.add('weather-card');
-                    weatherCard.innerHTML = `<strong>${icao}</strong>: ${data}`;
-                    document.getElementById('weather-list').prepend(weatherCard);
-                } else {
-                    alert("Weather data not found.");
-                }
-            } catch (error) {
-                console.error('Error fetching weather:', error);
-                alert("Error fetching weather data.");
-            }
-        });
-    </script>
+                <div id="error-message" class="error-message"></div>
+                
+                <div id="weather-info" class="panel" style="display: none;">
+                    <div class="panel-header">
+                        <h2 class="panel-title" id="airport-name">Airport Weather</h2>
+                        <div class="timestamp" id="weather-timestamp"></div>
+                    </div>
+                    
+                    <div class="weather-display">
+                        <div class="weather-info">
+                            <div class="weather-item">
+                                <span class="weather-label">Temperature</span>
+                                <span class="weather-value" id="temperature">--</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-label">Wind</span>
+                                <span class="weather-value" id="wind">--</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-label">Visibility</span>
+                                <span class="weather-value" id="visibility">--</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-label">Conditions</span>
+                                <span class="weather-value" id="conditions">--</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-label">Humidity</span>
+                                <span class="weather-value" id="humidity">--</span>
+                            </div>
+                            <div class="weather-item">
+                                <span class="weather-label">Pressure</span>
+                                <span class="weather-value" id="pressure">--</span>
+                            </div>
+                        </div>
+                        
+                        <div class="metar-display" id="raw-metar"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="flights-tab">
+                <div class="search-container">
+                    <input type="text" id="flight-search" class="search-input" placeholder="Search flights...">
+                    <button id="search-flight-btn" class="btn btn-primary">Search</button>
+                    <button id="refresh-flights" class="btn btn-secondary">Refresh</button>
+                </div>
+                
+                <div id="flights-info" class="panel">
+                    <!-- Flight items will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="tab-content" id="pilot-briefing-tab">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Pilot Weather Briefing</h2>
+                        <button id="aviationWeatherBtn" class="btn btn-primary">Get Full Briefing</button>
+                    </div>
+                    
+                    <div id="weatherDisplay" class="weather-display">
+                        <!-- Comprehensive weather data will appear here -->
+                        <p>Enter departure and destination ICAO codes to get a complete pilot briefing.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
 </body>
 </html>
-
