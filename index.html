@@ -1,62 +1,53 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Weather App</title>
     <link rel="stylesheet" href="styles.css">
+    <title>Welcome to My Weather App</title>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Simple Weather App</h1>
-            <p>Check current weather conditions anywhere in the world</p>
-        </header>
-        
-        <div class="search-container">
-            <input type="text" id="city-input" class="search-input" placeholder="Enter city name (e.g., London, New York)">
-            <button id="search-btn" class="btn btn-primary">Search</button>
-        </div>
-        
-        <div id="error-message" class="error-message"></div>
-        
-        <div class="unit-toggle">
-            <button id="unit-toggle-btn" class="unit-btn">Switch to Fahrenheit</button>
-        </div>
-        
-        <div id="weather-card" class="weather-card" style="display: none;">
-            <div class="location" id="location">--</div>
-            <div class="date" id="date">--</div>
-            
-            <div class="weather-main">
-                <div class="temperature" id="temperature">--</div>
-                <img class="weather-icon" id="weather-icon" src="" alt="Weather icon">
+    <div class="card">
+        <div class="card-header">
+            <h1 class="welcome-title">Welcome to Weather App</h1>
+            <div class="search">
+                <form id="search-form">
+                    <input type="text" placeholder="Enter city name" spellcheck="false" id="search-input">
+                    <button type="submit"><img src="assets/search.png" alt="Search"></button>
+                </form>
             </div>
-            
-            <div class="weather-description" id="weather-description">--</div>
-            
-            <div class="weather-details">
-                <div class="detail-item">
-                    <div class="detail-label">Humidity</div>
-                    <div class="detail-value" id="humidity">--</div>
+            <button id="theme-toggle" class="theme-btn">:first_quarter_moon: Toggle Theme</button>
+        </div>
+        <div class="error">
+            <p>Invalid city name!</p>
+        </div>
+        <div class="weather">
+            <img src="assets/rain.png" class="weather-icon">
+            <h1 class="temp">22°c</h1>
+            <h2 class="city">New York</h2>
+            <div class="details">
+                <div class="col">
+                    <img src="assets/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
                 </div>
-                <div class="detail-item">
-                    <div class="detail-label">Wind Speed</div>
-                    <div class="detail-value" id="wind-speed">--</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Pressure</div>
-                    <div class="detail-value" id="pressure">--</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Visibility</div>
-                    <div class="detail-value" id="visibility">--</div>
+                <div class="col">
+                    <img src="assets/wind.png">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
                 </div>
             </div>
+        </div>
+        <div class="search-history">
+            <h3>Search History</h3>
+            <ul id="history-list"></ul>
         </div>
     </div>
-
-  
     <script src="index.js"></script>
 </body>
 </html>

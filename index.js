@@ -1,179 +1,134 @@
-const cityInput = document.getElementById('city-input');
-const searchBtn = document.getElementById('search-btn');
-const errorElement = document.getElementById('error-message');
-const weatherCard = document.getElementById('weather-card');
-const unitToggleBtn = document.getElementById('unit-toggle-btn');
+const apiKey = "1156cdfb54b177fb904e9ff97e4dd89c";
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
 
-// Weather data elements
-const locationElement = document.getElementById('location');
-const dateElement = document.getElementById('date');
-const tempElement = document.getElementById('temperature');
-const weatherIcon = document.getElementById('weather-icon');
-const weatherDesc = document.getElementById('weather-description');
-const humidityElement = document.getElementById('humidity');
-const windElement = document.getElementById('wind-speed');
-const pressureElement = document.getElementById('pressure');
-const visibilityElement = document.getElementById('visibility');
+// DOM Elements
+const searchForm = document.querySelector("#search-form");
+const searchInput = document.querySelector("#search-input");
+const weatherIcon = document.querySelector(".weather-icon");
+const themeToggle = document.querySelector("#theme-toggle");
+const historyList = document.querySelector("#history-list");
+const clearHistoryBtn = document.createElement("button");
 
-// State
-let useCelsius = true;
-let currentWeatherData = null;
-let backgroundInterval;
+let searchHistory = JSON.parse(localStorage.getItem("weatherSearchHistory")) || [];
 
-// API Configuration
-const apiKey = '8f20807cea52eed92572aea82df038d5'; // Free-tier API key
-const apiUrl = 'https://api.openweathermap.org/data/2.5/weather';
+// Initialize theme
+const currentTheme = localStorage.getItem("theme") || "light";
+document.documentElement.setAttribute("data-theme", currentTheme);
+updateThemeButton();
 
-// Background images (weather-themed)
-const backgrounds = [
-    "url('https://images.unsplash.com/photo-1601134467661-3d775b999c8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-    "url('https://images.unsplash.com/photo-1492011221367-f47e3ccd77a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-    "url('https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-    "url('https://images.unsplash.com/photo-1504608524841-42fe6f032b4b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-    "url('https://images.unsplash.com/photo-1563974318767-a4de855d7b43?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')",
-    "url('https://images.unsplash.com/photo-1504253163759-c23fccaebb55?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80')"
-];
+// Create Clear History Button
+clearHistoryBtn.textContent = ":wastebasket: Clear History";
+clearHistoryBtn.classList.add("clear-history-btn");
+clearHistoryBtn.addEventListener("click", clearSearchHistory);
+document.querySelector(".search-history").appendChild(clearHistoryBtn);
+
+// Create and add footer
+const footer = document.createElement('footer');
+footer.innerHTML = ' :heart: ~R';
+document.body.appendChild(footer);
 
 // Event Listeners
-searchBtn.addEventListener('click', fetchWeather);
-cityInput.addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        fetchWeather();
+searchForm.addEventListener("submit", handleFormSubmit);
+themeToggle.addEventListener("click", toggleTheme);
+document.addEventListener("DOMContentLoaded", loadHistory);
+
+// Form Submit Handler
+async function handleFormSubmit(e) {
+    e.preventDefault();
+    const city = searchInput.value.trim();
+    if (city) {
+        await checkWeather(city);
+        addToHistory(city);
+        searchInput.value = "";
     }
+}
+
+// Toggle Theme
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    const newTheme = currentTheme === "light" ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    updateThemeButton();
+}
+
+function updateThemeButton() {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    themeToggle.textContent = currentTheme === "dark" ? ":sunny: Light Mode" : ":crescent_moon: Dark Mode";
+}
+
+// Load Search History
+function loadHistory() {
+    updateHistoryDisplay();
+}
+
+// Add to Search History
+function addToHistory(city) {
+    if (!searchHistory.includes(city)) {
+        searchHistory.unshift(city);
+        if (searchHistory.length > 5) searchHistory.pop();
+        localStorage.setItem("weatherSearchHistory", JSON.stringify(searchHistory));
+        updateHistoryDisplay();
+    }
+}
+
+// Clear Search History
+function clearSearchHistory() {
+    searchHistory = [];
+    localStorage.removeItem("weatherSearchHistory");
+    updateHistoryDisplay();
+}
+
+// Update History Display
+function updateHistoryDisplay() {
+    historyList.innerHTML = "";
+    if (searchHistory.length === 0) {
+        clearHistoryBtn.style.display = "none";
+    } else {
+        clearHistoryBtn.style.display = "block";
+    }
+
+searchHistory.forEach(city => {
+    const li = document.createElement("li");
+    li.textContent = city;
+    li.addEventListener("click", () => checkWeather(city));
+    historyList.appendChild(li);
 });
-unitToggleBtn.addEventListener('click', toggleTemperatureUnit);
-
-// Initialize
-checkDarkModePreference();
-startBackgroundRotation();
-
-// Functions
-function startBackgroundRotation() {
-    // Set initial background
-    changeBackground();
-    
-    // Change background every minute (60000 milliseconds)
-    backgroundInterval = setInterval(changeBackground, 60000);
 }
 
-function changeBackground() {
-    const randomIndex = Math.floor(Math.random() * backgrounds.length);
-    document.body.style.backgroundImage = backgrounds[randomIndex];
-}
-
-async function fetchWeather() {
-    const city = cityInput.value.trim();
-    
-    // Clear previous results
-    weatherCard.style.display = 'none';
-    errorElement.style.display = 'none';
-    errorElement.textContent = '';
-    
-    if (!city) {
-        showError('Please enter a city name');
-        return;
-    }
-    
-    // Show loading state
-    searchBtn.disabled = true;
-    const originalText = searchBtn.textContent;
-    searchBtn.innerHTML = '<span class="loading"></span> Loading...';
-    
+// Weather Check Function
+async function checkWeather(city) {
     try {
-        currentWeatherData = await getWeatherData(city);
-        displayWeather(currentWeatherData);
-    } catch (error) {
-        console.error('Error fetching weather:', error);
-        showError(error.message || 'Failed to fetch weather data. Please try again.');
-    } finally {
-        // Reset button state
-        searchBtn.disabled = false;
-        searchBtn.textContent = originalText;
-    }
-}
+        const response = await fetch(`${apiUrl}${city}&appid=${apiKey}`);
 
-async function getWeatherData(city) {
-    try {
-        const response = await fetch(`${apiUrl}?q=${city}&units=metric&appid=${apiKey}`);
-        
-        if (!response.ok) {
-            if (response.status === 404) {
-                throw new Error('City not found. Please check the spelling.');
-            } else {
-                throw new Error(`API request failed with status ${response.status}`);
-            }
-        }
-        
+        if (!response.ok) throw new Error("City not found");
+
         const data = await response.json();
-        return data;
+        updateWeatherDisplay(data);
+        document.querySelector(".error").style.display = "none";
+        document.querySelector(".weather").style.display = "block";
     } catch (error) {
-        console.error("Error fetching weather:", error);
-        throw new Error("Could not connect to weather service. Please try again later.");
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
     }
 }
 
-function displayWeather(data) {
-    // Location
-    locationElement.textContent = `${data.name}, ${data.sys.country}`;
-    
-    // Date
-    const date = new Date(data.dt * 1000);
-    dateElement.textContent = date.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-    
-    // Temperature
-    updateTemperatureDisplay();
-    
-    // Weather icon
-    weatherIcon.src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`;
-    weatherIcon.alt = data.weather[0].main;
-    
-    // Weather description
-    weatherDesc.textContent = data.weather[0].description;
-    
-    // Details
-    humidityElement.textContent = `${data.main.humidity}%`;
-    windElement.textContent = `${data.wind.speed} m/s`;
-    pressureElement.textContent = `${data.main.pressure} hPa`;
-    visibilityElement.textContent = `${(data.visibility / 1000).toFixed(1)} km`;
-    
-    // Show weather card
-    weatherCard.style.display = 'block';
-}
+// Update Weather Display
+function updateWeatherDisplay(data) {
+    document.querySelector(".city").textContent = data.name;
+    document.querySelector(".temp").textContent = `${Math.round(data.main.temp)}°C`;
+    document.querySelector(".humidity").textContent = `${data.main.humidity}%`;
+    document.querySelector(".wind").textContent = `${data.wind.speed} km/h`;
 
-function updateTemperatureDisplay() {
-    if (!currentWeatherData) return;
-    
-    const temp = useCelsius 
-        ? currentWeatherData.main.temp 
-        : (currentWeatherData.main.temp * 9/5) + 32;
-    tempElement.textContent = `${Math.round(temp)}°${useCelsius ? 'C' : 'F'}`;
-}
+    const weatherConditions = {
+        Clouds: "assets/clouds.png",
+        Clear: "assets/clear.png",
+        Rain: "assets/rain.png",
+        Drizzle: "assets/drizzle.png",
+        Mist: "assets/mist.png",
+        Snow: "assets/snow.png",
+        Thunderstorm: "assets/thunderstorm.png"
+    };
 
-function toggleTemperatureUnit() {
-    useCelsius = !useCelsius;
-    unitToggleBtn.textContent = useCelsius ? 'Switch to Fahrenheit' : 'Switch to Celsius';
-    
-    // Update temperature display if we have weather data
-    if (currentWeatherData) {
-        updateTemperatureDisplay();
-    }
+    weatherIcon.src = weatherConditions[data.weather[0].main] || "assets/clear.png";
 }
-
-function showError(message) {
-    errorElement.textContent = message;
-    errorElement.style.display = 'block';
-}
-
-function checkDarkModePreference() {
-    // Check for dark mode preference in localStorage
-    const darkMode = localStorage.getItem('darkMode') === 'true';
-    if (darkMode) {
-        document.body.classList.add('dark-mode');
-    }
-}
-
