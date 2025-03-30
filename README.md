@@ -1,1 +1,1 @@
-This is a simple weather App that tells the user the weather from any city in the world. It also tells the user other things like the humidity and windspeed. This app keeps the user up to date with everything sky
+This is a simple weather App that tells the user the weather from any city in the world. It also tells the user other things like the humidity and windspeed. This app keeps the user up to date with everything sky!

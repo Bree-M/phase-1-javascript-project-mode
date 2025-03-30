@@ -29,7 +29,7 @@ body {
 
 [data-theme="dark"] body {
     background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
-                     
+                      url('https://i.pinimg.com/736x/aa/c4/66/aac466016828b80d8b2aaf401e21cadf.jpg');
 }
 
 [data-theme="dark"] .card {

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,46 +7,37 @@
     <title>Welcome to My Weather App</title>
 </head>
 <body>
-    <div class="card">
-        <div class="card-header">
-            <h1 class="welcome-title">Welcome to Weather App</h1>
-            <div class="search">
-                <form id="search-form">
-                    <input type="text" placeholder="Enter city name" spellcheck="false" id="search-input">
-                    <button type="submit"><img src="assets/search.png" alt="Search"></button>
-                </form>
-            </div>
-            <button id="theme-toggle" class="theme-btn">:first_quarter_moon: Toggle Theme</button>
-        </div>
-        <div class="error">
-            <p>Invalid city name!</p>
-        </div>
-        <div class="weather">
-            <img src="assets/rain.png" class="weather-icon">
-            <h1 class="temp">22°c</h1>
-            <h2 class="city">New York</h2>
+    <div class="container">
+        <h1>Weather App</h1>
+        
+        <button id="theme-toggle">🌙 Dark Mode</button>
+        
+        <form id="search-form" class="search-container">
+            <input type="text" id="search-input" placeholder="Enter city name">
+            <button type="submit">Search</button>
+        </form>
+        
+        <div class="error">City not found. Please try again.</div>
+        
+        <div class="weather-card">
+            <h2 class="city"></h2>
+            <div class="weather-icon"></div>
+            <div class="temp"></div>
             <div class="details">
-                <div class="col">
-                    <img src="assets/humidity.png">
-                    <div>
-                        <p class="humidity">50%</p>
-                        <p>Humidity</p>
-                    </div>
-                </div>
-                <div class="col">
-                    <img src="assets/wind.png">
-                    <div>
-                        <p class="wind">15 km/h</p>
-                        <p>Wind Speed</p>
-                    </div>
-                </div>
+                <div>Humidity: <span class="humidity"></span>%</div>
+                <div>Wind: <span class="wind"></span> km/h</div>
             </div>
         </div>
+        
         <div class="search-history">
             <h3>Search History</h3>
             <ul id="history-list"></ul>
+            <button class="clear-history-btn">🗑️ Clear History</button>
         </div>
     </div>
+
+    <footer> ❤️ ~R.</footer>
+
     <script src="index.js"></script>
 </body>
 </html>
