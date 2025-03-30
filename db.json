@@ -1,0 +1,14 @@
+{
+  "preferences": [
+    {
+      "id": "1",
+      "theme": "light",
+      "notifications": true,
+      "streak": {
+        "count": 0,
+        "lastDate": ""
+      },
+      "lastLocation": null
+    }
+  ]
+}
