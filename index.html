@@ -3,101 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aviation Weather App</title>
-    <link rel="stylesheet" href="styles.css">
- </head>
-<body>
+    <title>Aviation Weather Dashboard</title>
     <div class="container">
-        <header>
-            <h1>Aviation Weather Dashboard</h1>
-            <div class="bg-controls">
-                <button id="prev-bg" class="btn btn-light">← Background</button>
-                <button id="next-bg" class="btn btn-light">Background →</button>
-            </div>
-        </header>
+    <header>
+        <h1>Aviation Weather Dashboard</h1>
+        <div class="bg-controls">
+            <button id="prev-bg" class="btn btn-light">← Background</button>
+            <button id="next-bg" class="btn btn-light">Background →</button>
+            <button id="darkModeToggle" class="dark-mode-toggle">🌓</button>
+        </div>
+    </header>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-button active" data-tab="weather">Weather</button>
+            <button class="tab-button" data-tab="flights">Flight Information</button>
+            <button class="tab-button" data-tab="pilot-briefing">Pilot Briefing</button>
+            <button class="tab-button" data-tab="favorites">Favorites</button>
+        </div>
         
-        <div class="tab-container">
-            <div class="tab-buttons">
-                <button class="tab-button active" data-tab="weather">Weather</button>
-                <button class="tab-button" data-tab="flights">Flight Information</button>
-                <button class="tab-button" data-tab="pilot-briefing">Pilot Briefing</button>
+        <div class="tab-content active" id="weather-tab">
+            <div class="search-container">
+                <input type="text" id="icao-code" class="search-input" placeholder="Enter ICAO code (e.g., KLAX)" maxlength="4">
+                <button id="search-btn" class="btn btn-primary">Get Weather</button>
             </div>
             
-            <div class="tab-content active" id="weather-tab">
-                <div class="search-container">
-                    <input type="text" id="icao-code" class="search-input" placeholder="Enter ICAO code (e.g., KLAX)" maxlength="4">
-                    <button id="search-btn" class="btn btn-primary">Get Weather</button>
+            <div id="error-message" class="error-message"></div>
+            
+            <div id="weather-info" class="panel" style="display: none;">
+                <div class="panel-header">
+                    <h2 class="panel-title" id="airport-name">Airport Weather</h2>
+                    <button id="favorite-btn" class="favorite-btn">★</button>
+                    <div class="timestamp" id="weather-timestamp"></div>
                 </div>
                 
-                <div id="error-message" class="error-message"></div>
-                
-                <div id="weather-info" class="panel" style="display: none;">
-                    <div class="panel-header">
-                        <h2 class="panel-title" id="airport-name">Airport Weather</h2>
-                        <div class="timestamp" id="weather-timestamp"></div>
-                    </div>
-                    
-                    <div class="weather-display">
-                        <div class="weather-info">
-                            <div class="weather-item">
-                                <span class="weather-label">Temperature</span>
-                                <span class="weather-value" id="temperature">--</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-label">Wind</span>
-                                <span class="weather-value" id="wind">--</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-label">Visibility</span>
-                                <span class="weather-value" id="visibility">--</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-label">Conditions</span>
-                                <span class="weather-value" id="conditions">--</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-label">Humidity</span>
-                                <span class="weather-value" id="humidity">--</span>
-                            </div>
-                            <div class="weather-item">
-                                <span class="weather-label">Pressure</span>
-                                <span class="weather-value" id="pressure">--</span>
-                            </div>
+                <div class="weather-display">
+                    <div class="weather-info">
+                        <div class="weather-item">
+                            <span class="weather-label">Temperature</span>
+                            <span class="weather-value" id="temperature">--</span>
                         </div>
-                        
-                        <div class="metar-display" id="raw-metar"></div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tab-content" id="flights-tab">
-                <div class="search-container">
-                    <input type="text" id="flight-search" class="search-input" placeholder="Search flights...">
-                    <button id="search-flight-btn" class="btn btn-primary">Search</button>
-                    <button id="refresh-flights" class="btn btn-secondary">Refresh</button>
-                </div>
-                
-                <div id="flights-info" class="panel">
-                    <!-- Flight items will be inserted here -->
-                </div>
-            </div>
-            
-            <div class="tab-content" id="pilot-briefing-tab">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Pilot Weather Briefing</h2>
-                        <button id="aviationWeatherBtn" class="btn btn-primary">Get Full Briefing</button>
+                        <div class="weather-item">
+                            <span class="weather-label">Wind</span>
+                            <span class="weather-value" id="wind">--</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">Visibility</span>
+                            <span class="weather-value" id="visibility">--</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">Conditions</span>
+                            <span class="weather-value" id="conditions">--</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">Humidity</span>
+                            <span class="weather-value" id="humidity">--</span>
+                        </div>
+                        <div class="weather-item">
+                            <span class="weather-label">Pressure</span>
+                            <span class="weather-value" id="pressure">--</span>
+                        </div>
                     </div>
                     
-                    <div id="weatherDisplay" class="weather-display">
-                        <!-- Comprehensive weather data will appear here -->
-                        <p>Enter departure and destination ICAO codes to get a complete pilot briefing.</p>
-                    </div>
+                    <div class="metar-display" id="raw-metar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="flights-tab">
+            <div class="search-container">
+                <input type="text" id="flight-search" class="search-input" placeholder="Search flights...">
+                <button id="search-flight-btn" class="btn btn-primary">Search</button>
+                <button id="refresh-flights" class="btn btn-secondary">Refresh</button>
+            </div>
+            
+            <div id="flights-info" class="panel">
+                <!-- Flight items will be inserted here -->
+            </div>
+        </div>
+        
+        <div class="tab-content" id="pilot-briefing-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Pilot Weather Briefing</h2>
+                    <button id="aviationWeatherBtn" class="btn btn-primary">Get Full Briefing</button>
+                </div>
+                
+                <div id="weatherDisplay" class="weather-display">
+                    <!-- Comprehensive weather data will appear here -->
+                    <p>Enter departure and destination ICAO codes to get a complete pilot briefing.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="favorites-tab">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Favorite Airports</h2>
+                    <button id="refresh-favorites" class="btn btn-secondary">Refresh</button>
+                </div>
+                
+                <div id="favorites-display" class="weather-display">
+                    <!-- Favorite airports will appear here -->
+                    <p>No favorite airports yet. Search for airports and click the star to add them.</p>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="index.js"></script>
-</body>
-</html>
+</div>

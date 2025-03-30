@@ -26,6 +26,17 @@ document.getElementById('next-bg').addEventListener('click', () => {
   rotateBackground();
 });
 
+// Dark mode toggle
+document.getElementById('darkModeToggle').addEventListener('click', () => {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+});
+
+// Check for dark mode preference
+if (localStorage.getItem('darkMode') === 'true') {
+  document.body.classList.add('dark-mode');
+}
+
 // Tab functionality
 document.querySelectorAll('.tab-button').forEach(button => {
   button.addEventListener('click', () => {
@@ -40,22 +51,104 @@ document.querySelectorAll('.tab-button').forEach(button => {
   });
 });
 
-// Weather API functionality with CORS proxy
+// Favorites functionality
+let favorites = JSON.parse(localStorage.getItem('favoriteAirports')) || [];
+let currentIcao = '';
+
+// Favorite button event listener
+document.getElementById('favorite-btn').addEventListener('click', function() {
+  if (!currentIcao) return;
+  
+  const index = favorites.indexOf(currentIcao);
+  if (index === -1) {
+      favorites.push(currentIcao);
+      this.classList.add('active');
+  } else {
+      favorites.splice(index, 1);
+      this.classList.remove('active');
+  }
+  
+  localStorage.setItem('favoriteAirports', JSON.stringify(favorites));
+  renderFavorites();
+});
+
+// Render favorites list
+function renderFavorites() {
+  const favoritesDisplay = document.getElementById('favorites-display');
+  
+  if (favorites.length === 0) {
+      favoritesDisplay.innerHTML = '<p>No favorite airports yet. Search for airports and click the star to add them.</p>';
+      return;
+  }
+  
+  favoritesDisplay.innerHTML = '';
+  
+  // Use forEach to iterate through favorites
+  favorites.forEach(async icao => {
+      try {
+          const weather = await fetchAviationWeather(icao);
+          displayFavoriteWeather(weather, favoritesDisplay);
+      } catch (error) {
+          console.error(`Error loading favorite ${icao}:`, error);
+          // Remove from favorites if it fails to load
+          favorites = favorites.filter(fav => fav !== icao);
+          localStorage.setItem('favoriteAirports', JSON.stringify(favorites));
+      }
+  });
+}
+
+// Display favorite weather
+function displayFavoriteWeather(weather, container) {
+  const weatherElement = document.createElement('div');
+  weatherElement.className = 'weather-info';
+  weatherElement.innerHTML = `
+      <div class="panel-header">
+          <h3>${weather.name} (${weather.icao})</h3>
+          <button class="favorite-btn active" data-icao="${weather.icao}">★</button>
+      </div>
+      <div class="weather-item">
+          <span class="weather-label">Temperature:</span>
+          <span class="weather-value">${weather.temperature}°C</span>
+      </div>
+      <div class="weather-item">
+          <span class="weather-label">Wind:</span>
+          <span class="weather-value">${weather.wind.direction}° at ${weather.wind.speed}kts</span>
+      </div>
+      <div class="weather-item">
+          <span class="weather-label">Conditions:</span>
+          <span class="weather-value">${weather.conditions}</span>
+      </div>
+      <div class="metar-display">${weather.raw}</div>
+  `;
+  
+  container.appendChild(weatherElement);
+  
+  // Add event listener to the favorite button
+  weatherElement.querySelector('.favorite-btn').addEventListener('click', function() {
+      const icao = this.dataset.icao;
+      favorites = favorites.filter(fav => fav !== icao);
+      localStorage.setItem('favoriteAirports', JSON.stringify(favorites));
+      renderFavorites();
+  });
+}
+
+// Refresh favorites button
+document.getElementById('refresh-favorites').addEventListener('click', renderFavorites);
+
+// Weather API functionality
 async function getAviationWeather(icao) {
   try {
-      // Using a CORS proxy to avoid issues
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const apiUrl = `https://aviationweather.gov/cgi-bin/data/dataserver.php?datasource=metars&format=json&stationString=${icao}&hoursBeforeNow=2`;
       
-      const response = await fetch(proxyUrl + apiUrl, {
-          headers: {
-              'X-Requested-With': 'XMLHttpRequest'
-          }
-      });
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+      }
       
       const data = await response.json();
       
-      if(!data.data || !data.data.METAR || data.data.METAR.length === 0) {
+      if (!data.data || !data.data.METAR || data.data.METAR.length === 0) {
           throw new Error("No weather data available for this airport");
       }
       
@@ -66,7 +159,7 @@ async function getAviationWeather(icao) {
           raw: metar.raw_text,
           temperature: metar.temp_c,
           wind: {
-              direction: metar.wind_dir_degrees,
+              direction: metar.wind_dir_degrees || 'VRB',
               speed: metar.wind_speed_kt,
               gusts: metar.wind_gust_kt
           },
@@ -87,7 +180,6 @@ async function getAviationWeather(icao) {
 }
 
 function getAirportName(icao) {
-  // Simple mapping - in a real app you'd want a more comprehensive list
   const airportNames = {
       'KLAX': 'Los Angeles International',
       'KJFK': 'John F. Kennedy International',
@@ -108,6 +200,7 @@ document.getElementById('search-btn').addEventListener('click', async function()
   const icaoCode = document.getElementById('icao-code').value.trim().toUpperCase();
   const errorElement = document.getElementById('error-message');
   const weatherInfo = document.getElementById('weather-info');
+  const favoriteBtn = document.getElementById('favorite-btn');
   
   // Clear previous results
   weatherInfo.style.display = 'none';
@@ -127,6 +220,7 @@ document.getElementById('search-btn').addEventListener('click', async function()
   
   try {
       const weather = await getAviationWeather(icaoCode);
+      currentIcao = icaoCode;
       
       // Update UI with weather data
       document.getElementById('airport-name').textContent = `${weather.name} (${weather.station})`;
@@ -144,6 +238,9 @@ document.getElementById('search-btn').addEventListener('click', async function()
       document.getElementById('visibility').textContent = `${weather.visibility} miles`;
       document.getElementById('raw-metar').textContent = weather.raw;
       document.getElementById('weather-timestamp').textContent = `Last updated: ${new Date(weather.timestamp).toLocaleString()}`;
+      
+      // Update favorite button
+      favoriteBtn.classList.toggle('active', favorites.includes(icaoCode));
       
       // Show weather info
       weatherInfo.style.display = 'block';
@@ -497,6 +594,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('aviationWeatherBtn').addEventListener('click', function() {
       refreshBriefing();
   });
+
+  // Load initial favorites
+  renderFavorites();
 });
 
 // Make refreshBriefing available globally
